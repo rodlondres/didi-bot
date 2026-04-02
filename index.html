@@ -509,9 +509,9 @@ const MODES=[
    desc:'Omni: monitora todos os 7 pares simultaneamente. Entra em qualquer agulhada detectada.'},
 ];
 const INIT=10000, MAXC=80, SHOW=44;
-const TFRAMES=[{id:'M1',lbl:'M1',gran:60,vfMult:1},{id:'M5',lbl:'M5',gran:300,vfMult:2.2},{id:'M15',lbl:'M15',gran:900,vfMult:4},{id:'H1',lbl:'H1',gran:3600,vfMult:8}];
+const TFRAMES=[{id:'M1',lbl:'M1',gran:60,vfMult:1},{id:'M5',lbl:'M5',gran:300,vfMult:1.1},{id:'M15',lbl:'M15',gran:900,vfMult:1.2},{id:'H1',lbl:'H1',gran:3600,vfMult:1.4}];
 const cfg={sl:50,tp:100,slTp:false,lot:1,mg:false,mgM:2,mxL:3,sA:true,sTr:true,sSL:true,spd:1500,bbP:8,bbS:2,bbV:true,adxP:8};
-let pair=PAIRS[0], mode=MODES[0], tf=TFRAMES[0], bal=INIT, trades=[], run=true, ticker=null;
+let pair=PAIRS[0], mode=MODES[0], tf=TFRAMES[0], bal=INIT, derivBal=null, trades=[], run=true, ticker=null;
 let pD={}, confD=null, cfCnt=0, cfIv=null, ws=null, wsS='off', snd=true, consL=0, lastP=0, curTab=0;
 
 // ─── AUDIO ─────────────────────────────────────────────────────────────────
@@ -533,10 +533,12 @@ function sma(a,n){return a.length>=n?a.slice(-n).reduce((s,v)=>s+v,0)/n:null}
 // ─── CANDLE GENERATION ─────────────────────────────────────────────────────
 function genC(pr,p){
   const v=p.base*(p.vf||.0004)*tf.vfMult;
-  const chg=(Math.random()-.491)*v*1.7+(Math.random()-.5)*v*.8;
+  // mean-reversion: puxa suavemente de volta ao preço base
+  const drift=(p.base-pr)*0.015;
+  const chg=drift+(Math.random()-.5)*v*1.6+(Math.random()-.5)*v*.5;
   const o=+pr.toFixed(p.dec), c=+(pr+chg).toFixed(p.dec);
-  const span=Math.abs(c-o)||v*.3, wk=span*(.5+Math.random()*.7);
-  return{o,c,h:+(Math.max(o,c)+wk*(.2+Math.random()*.8)).toFixed(p.dec),l:+(Math.min(o,c)-wk*(.2+Math.random()*.8)).toFixed(p.dec)};
+  const span=Math.abs(c-o)||v*.3, wk=span*(.4+Math.random()*.6);
+  return{o,c,h:+(Math.max(o,c)+wk*(.15+Math.random()*.7)).toFixed(p.dec),l:+(Math.min(o,c)-wk*(.15+Math.random()*.7)).toFixed(p.dec)};
 }
 
 // ─── INDICATORS ────────────────────────────────────────────────────────────
@@ -665,7 +667,18 @@ function wSend(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
 function sub(p){wSend({ticks_history:p.sym,count:MAXC,end:'latest',granularity:tf.gran,style:'candles',subscribe:1})}
 function hMsg(d){
   if(d.error){if(d.msg_type==='authorize')sWs('err');return;}
-  if(d.msg_type==='authorize'){sWs('live');kTk();(mode.omni?PAIRS:[pair]).forEach(sub);return;}
+  if(d.msg_type==='authorize'){
+    sWs('live');kTk();
+    wSend({balance:1,subscribe:1});
+    (mode.omni?PAIRS:[pair]).forEach(sub);return;
+  }
+  if(d.msg_type==='balance'){
+    derivBal=+d.balance.balance;
+    const cur=d.balance.currency||'USD';
+    const el=document.getElementById('sBalLive');
+    if(el){el.textContent=derivBal.toFixed(2)+' '+cur;el.style.color='#00ff88';}
+    rA();return;
+  }
   if(d.msg_type==='candles'){const sym=d.echo_req?.ticks_history;const p=PAIRS.find(x=>x.sym===sym);if(!p)return;const pd=pD[p.id];if(!pd)return;
     pd.cs=d.candles.map(c=>({o:+c.open,h:+c.high,l:+c.low,c:+c.close}));
     pd.lb=d.candles.map(c=>new Date(c.epoch*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
@@ -677,7 +690,7 @@ function hMsg(d){
       const cl=pd.cs.map(c=>c.c);pd.inds=calcInds(cl);pd.sig=getSig(pd.inds,mode.thr);hTrade(p,pd,pd.sig);rA();
     }else{pd.cs[pd.cs.length-1]=nc;if(p.id===pair.id)dCharts();}}
 }
-function sWs(s){wsS=s;const el=document.getElementById('wl');const M={off:['⬤ OFFLINE','#1a1a40'],conn:['⬤ CONECTANDO','#ffcc00'],live:['⬤ AO VIVO','#00ff88'],err:['⬤ TOKEN INVÁLIDO','#ff3355']};const[t,c]=M[s]||M.off;el.textContent=t;el.style.color=c;U('cb',s==='live'?'Desconectar':'Conectar');}
+function sWs(s){wsS=s;if(s==='off'||s==='err')derivBal=null;const el=document.getElementById('wl');const M={off:['⬤ OFFLINE','#1a1a40'],conn:['⬤ CONECTANDO','#ffcc00'],live:['⬤ AO VIVO','#00ff88'],err:['⬤ TOKEN INVÁLIDO','#ff3355']};const[t,c]=M[s]||M.off;el.textContent=t;el.style.color=c;U('cb',s==='live'?'Desconectar':'Conectar');}
 
 // ─── RENDER ────────────────────────────────────────────────────────────────
 function rA(){if(curTab===0)rPanel();else if(curTab===1)rOmni();else if(curTab===2)rHist();dCharts();}
@@ -695,14 +708,14 @@ function rPanel(){
   const aL=ast==='nt'?'⚠ SEM TEND.':ast==='up'?'↑ ALTA':'↓ BAIXA';
 
   document.getElementById('sts').innerHTML=[
-    {l:'SALDO',      v:'$'+bal.toFixed(2),                c:'#00d4ff'},
+    {l:'SALDO'+(wsS==='live'?'  ⬤ LIVE':''), v:wsS==='live'&&derivBal!=null?derivBal.toFixed(2)+' USD':'$'+bal.toFixed(2), c:wsS==='live'&&derivBal!=null?'#00ff88':'#00d4ff'},
     {l:'P&L ABERTO', v:(op>=0?'+':'')+'$'+op,             c:op>=0?'#00ff88':'#ff3355'},
     {l:'P&L TOTAL',  v:(tPnl>=0?'+':'')+'$'+tPnl,        c:tPnl>=0?'#00ff88':'#ff3355'},
     {l:'WIN RATE',   v:wr+'%',                            c:wr>=50?'#00ff88':'#ff8844'},
     {l:'W / L',      v:wins+'/'+(trades.length-wins),     c:'#555'},
     {l:'ADX TREND',  v:aL,                                c:aC},
     {l:'PREÇO',      v:cur.toFixed(pair.dec),             c:pair.vol?'#cc44ff':'#eee'},
-  ].map(s=>`<div class="scard"><div class="scard-l">${s.l}</div><div class="scard-v" style="color:${s.c};${s.l==='ADX TREND'?'font-size:11px':''}">${s.v}</div></div>`).join('');
+  ].map(s=>`<div class="scard"><div class="scard-l">${s.l}</div><div class="scard-v" style="color:${s.c};${s.l.startsWith('ADX')?'font-size:11px':s.l.startsWith('SALDO')&&wsS==='live'?'font-size:13px':''}">${s.v}</div></div>`).join('');
 
   document.getElementById('sBar').className='sigbar'+(sig==='BUY'?' buy':sig==='SELL'?' sell':'');
   document.getElementById('sIc').textContent=sig==='BUY'?'📈':sig==='SELL'?'📉':'⏳';
@@ -816,10 +829,15 @@ function dPrice(pd){
   const bb=cfg.bbV?calcBB(cl,cfg.bbP,cfg.bbS).slice(-SHOW):null;
   const ind=pd.inds.slice(-SHOW);
 
-  const av=[];cands.forEach(c=>{av.push(c.h,c.l)});
-  if(bb)bb.forEach(b=>{if(b.up!=null){av.push(b.up,b.lo)}});
-  const rawMn=Math.min(...av),rawMx=Math.max(...av);
-  const pad=(rawMx-rawMn)*.05||.0001;
+  // ── Escala Y com percentil para evitar outliers ──────────────────────────
+  const allPrices=[];
+  cands.forEach(c=>{allPrices.push(c.h,c.l,c.o,c.c)});
+  if(bb)bb.forEach(b=>{if(b.up!=null){allPrices.push(b.up,b.lo)}});
+  allPrices.sort((a,b)=>a-b);
+  const trim=Math.max(1,Math.floor(allPrices.length*.03));
+  const rawMn=allPrices[trim]??allPrices[0];
+  const rawMx=allPrices[allPrices.length-1-trim]??allPrices[allPrices.length-1];
+  const pad=(rawMx-rawMn)*.12||.0002;
   const lo=rawMn-pad,rng=(rawMx-rawMn+pad*2)||.001;
   const tY=v=>PT+cH-((v-lo)/rng)*cH;
   const sw=cW/n,tX=i=>PL+(i+.5)*sw,hw=Math.max(2,Math.min(7,sw*.38));
