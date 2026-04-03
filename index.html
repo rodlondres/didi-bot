@@ -221,18 +221,33 @@ input[type=range]{width:88px;accent-color:var(--cyan);cursor:pointer;-webkit-app
 .glo{animation:glo 1.2s ease-in-out infinite}
 .pulse{animation:pulse 1.4s ease-in-out infinite}
 
+.cw{width:100%;min-width:0}
+#pC,#dC,#aC{width:100%!important;min-width:0!important;display:block}
+#app{overflow-x:hidden}
 @media(min-width:2560px){html{font-size:20px}#app{max-width:3000px}canvas{image-rendering:crisp-edges}}
 @media(min-width:3840px){html{font-size:26px}#app{max-width:4500px}}
 @media(min-width:7680px){html{font-size:48px}#app{max-width:8200px}.logo{font-size:58px}}
 @media(max-width:700px){
-  html{font-size:13px}#app{padding:8px 8px}.hdr{padding:12px 14px}
-  .logo{font-size:15px;letter-spacing:1px}.logo-badge,.logo-ver{display:none}
-  .tin{width:130px}.stats{grid-template-columns:repeat(4,1fr)}
+  html{font-size:13px}#app{padding:6px 6px}.hdr{padding:10px 12px}
+  .logo{font-size:14px;letter-spacing:1px}.logo-badge,.logo-ver{display:none}
+  .tin{width:120px;font-size:10px;padding:7px 10px}.stats{grid-template-columns:repeat(4,1fr)}
   .stats .scard:nth-child(n+5){display:none}.ctrl{grid-template-columns:repeat(3,1fr)}
   .og{grid-template-columns:repeat(4,1fr)}.cfgrid{grid-template-columns:1fr}
   .intel-grid{grid-template-columns:1fr}.dsgrid{grid-template-columns:repeat(2,1fr)}
+  /* Charts fill full mobile width */
+  .cw{padding:10px 6px 6px}
+  #pC{height:240px!important}
+  #dC,#aC{height:140px!important}
+  .ch{gap:6px;font-size:10px}
+  .ctitle{font-size:10px;letter-spacing:1px}
+  .tabs .tab{padding:8px 10px;font-size:8px;letter-spacing:1px}
+  .pairs{gap:4px}.pbtn{padding:5px 10px;font-size:8px}
+  .modes{gap:4px}.mb{padding:6px 10px;font-size:8px}
 }
-@media(max-width:390px){.stats{grid-template-columns:repeat(2,1fr)}.ctrl{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:390px){
+  .stats{grid-template-columns:repeat(2,1fr)}.ctrl{grid-template-columns:repeat(2,1fr)}
+  #pC{height:200px!important}#dC,#aC{height:120px!important}
+}
 </style>
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 </head>
@@ -301,18 +316,21 @@ input[type=range]{width:88px;accent-color:var(--cyan);cursor:pointer;-webkit-app
         <span class="cleg"><div class="cvl" style="background:var(--ma8)"></div>&nbsp;MA8</span>
         <span class="cleg"><div class="cvl" style="background:var(--ma20)"></div>&nbsp;MA20</span>
         <span id="slLbl" style="color:var(--tx3);font-size:10px;font-family:var(--fhd)"></span>
+        <button onclick="expandChart('pC','pW',400,600)" title="Expandir" style="background:transparent;border:1px solid var(--b2);color:var(--tx2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--tx2)'">⤢</button>
       </span>
     </div>
-    <div id="pC" style="height:260px;border-radius:6px;overflow:hidden"></div>
+    <div id="pC" style="height:360px;width:100%;border-radius:6px;overflow:hidden"></div>
   </div>
   <div class="cw" id="dW">
     <div class="ch">
       <span class="ctitle">DIDI INDEX · MA3/MA8/MA20</span>
-      <span class="cleg"><div class="cvl" style="background:var(--fast)"></div>&nbsp;Fast (MA3÷MA8)</span>
+      <span class="cleg"><div class="cvl" style="background:#00ff88"></div>&nbsp;Fast (MA3÷MA8)</span>
+      <span class="cleg"><div class="cvl" style="background:#00eeff"></div>&nbsp;MA8 ref</span>
       <span class="cleg"><div class="cvl" style="background:var(--slow)"></div>&nbsp;Slow (MA20÷MA8)</span>
       <span id="dSg" style="margin-left:auto;font-family:var(--fhd);font-size:10px"></span>
+      <button onclick="expandChart('dC','dW',180,340)" title="Expandir" style="background:transparent;border:1px solid var(--b2);color:var(--tx2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;margin-left:8px;transition:all .2s" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--tx2)'">⤢</button>
     </div>
-    <div id="dC" style="height:130px;border-radius:6px;overflow:hidden"></div>
+    <div id="dC" style="height:180px;width:100%;border-radius:6px;overflow:hidden"></div>
   </div>
   <div class="cw" id="aW">
     <div class="ch">
@@ -322,8 +340,9 @@ input[type=range]{width:88px;accent-color:var(--cyan);cursor:pointer;-webkit-app
       <span class="cleg"><div class="cvl" style="background:var(--adxv)"></div>&nbsp;ADX</span>
       <span style="color:var(--gold);opacity:.55;font-size:12px">─&nbsp;32</span>
       <span id="aSt" style="margin-left:auto;font-family:var(--fhd);font-size:10px"></span>
+      <button onclick="expandChart('aC','aW',180,340)" title="Expandir" style="background:transparent;border:1px solid var(--b2);color:var(--tx2);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:12px;margin-left:8px;transition:all .2s" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--tx2)'">⤢</button>
     </div>
-    <div id="aC" style="height:130px;border-radius:6px;overflow:hidden"></div>
+    <div id="aC" style="height:180px;width:100%;border-radius:6px;overflow:hidden"></div>
   </div>
   <div class="ctrl">
     <button class="btn brun" id="bRn" onclick="tRun()">⏸ PAUSAR</button>
@@ -411,11 +430,11 @@ input[type=range]{width:88px;accent-color:var(--cyan);cursor:pointer;-webkit-app
 //  CONSTANTS & DATA
 // ════════════════════════════════════════════════════════
 const PAIRS=[
-  {id:'EURUSD',lbl:'EUR/USD',sym:'frxEURUSD',base:1.0850,dec:5,mlt:10000,vf:.00050,vol:false},
-  {id:'GBPUSD',lbl:'GBP/USD',sym:'frxGBPUSD',base:1.2650,dec:5,mlt:10000,vf:.00050,vol:false},
-  {id:'USDJPY',lbl:'USD/JPY',sym:'frxUSDJPY',base:149.50,dec:3,mlt:100,  vf:.00050,vol:false},
-  {id:'AUDUSD',lbl:'AUD/USD',sym:'frxAUDUSD',base:0.6580,dec:5,mlt:10000,vf:.00050,vol:false},
-  {id:'USDCAD',lbl:'USD/CAD',sym:'frxUSDCAD',base:1.3650,dec:5,mlt:10000,vf:.00050,vol:false},
+  {id:'EURUSD',lbl:'EUR/USD',sym:'frxEURUSD',base:1.0850,dec:5,mlt:10000,vf:.0025,vol:false},
+  {id:'GBPUSD',lbl:'GBP/USD',sym:'frxGBPUSD',base:1.2650,dec:5,mlt:10000,vf:.0025,vol:false},
+  {id:'USDJPY',lbl:'USD/JPY',sym:'frxUSDJPY',base:149.50,dec:3,mlt:100,  vf:.0025,vol:false},
+  {id:'AUDUSD',lbl:'AUD/USD',sym:'frxAUDUSD',base:0.6580,dec:5,mlt:10000,vf:.0025,vol:false},
+  {id:'USDCAD',lbl:'USD/CAD',sym:'frxUSDCAD',base:1.3650,dec:5,mlt:10000,vf:.0025,vol:false},
   {id:'VOL75', lbl:'VOL 75', sym:'R_75',     base:560000,dec:2,mlt:.002,  vf:.0080, vol:true},
   {id:'VOL50', lbl:'VOL 50', sym:'R_50',     base:155000,dec:2,mlt:.005,  vf:.0060, vol:true},
 ];
@@ -472,9 +491,9 @@ function addLog(msg,col='#7888aa'){decLogs.unshift({t:nowT(),msg,col});if(decLog
 //  CANDLE GENERATION — realistic controlled random walk
 // ════════════════════════════════════════════════════════
 function genC(pr,p){
-  const v=p.base*(p.vf||.0005)*tf.vm;
-  const drift=(p.base-pr)*0.006;
-  const body=(Math.random()-.5)*v*2.0+drift;
+  const v=p.base*(p.vf||.0025)*tf.vm;
+  const drift=(p.base-pr)*0.002;
+  const body=(Math.random()-.5)*v*2.8+drift;
   const o=+pr.toFixed(p.dec), c=+(pr+body).toFixed(p.dec);
   const rng=Math.abs(c-o)||v*.4;
   const hi=+(Math.max(o,c)+rng*(.20+Math.random()*.50)).toFixed(p.dec);
@@ -493,7 +512,7 @@ function calcInds(cl){
   });
 }
 function getSig(inds,thr){
-  const d=inds[inds.length-1];if(!d||d.fast==null)return null;
+  const d=inds[inds.length-1];if(!d||d.fast==null||d.slow==null)return null;
   if(d.fast>thr&&d.slow<-thr)return'BUY';
   if(d.fast<-thr&&d.slow>thr)return'SELL';
   return null;
@@ -898,8 +917,8 @@ function rIntel(){
   document.getElementById('intelCards').innerHTML=`
   <div class="intel-card">
     <div class="intel-title">🎯 Didi Index · Agulhada</div>
-    <div class="intel-row"><span class="irl">Fast (MA3÷MA8)</span><span class="irv" style="color:${(indsL.fast||0)>0?'#00ff88':'#ff3355'}">${indsL.fast!=null?indsL.fast.toFixed(4):'─'}</span></div>
-    <div class="intel-row"><span class="irl">Slow (MA20÷MA8)</span><span class="irv" style="color:${(indsL.slow||0)>0?'#00ff88':'#ff3355'}">${indsL.slow!=null?indsL.slow.toFixed(4):'─'}</span></div>
+    <div class="intel-row"><span class="irl">MA3 (verde)</span><span class="irv" style="color:${(indsL.fast||0)>0?'#00ff88':'#ff3355'}">${indsL.fast!=null?indsL.fast.toFixed(4):'─'}</span></div>
+    <div class="intel-row"><span class="irl">MA20 (rosa)</span><span class="irv" style="color:${(indsL.slow||0)>0?'#00ff88':'#ff3355'}">${indsL.slow!=null?indsL.slow.toFixed(4):'─'}</span></div>
     <div class="intel-row"><span class="irl">Threshold</span><span class="irv" style="color:var(--gold)">± ${mode.thr}</span></div>
     <div class="intel-row"><span class="irl">Agulhada</span><span class="irv" style="color:${sig==='BUY'?'#00ff88':sig==='SELL'?'#ff3355':'#404870'}">${sig||'AGUARDANDO'}</span></div>
     <div class="intel-row"><span class="irl">Score / Mínimo</span><span class="irv" style="color:${regime.score>=cfg.minScore?'#00ff88':'#ff9944'}">${regime.score} / ${cfg.minScore}</span></div>
@@ -1026,7 +1045,7 @@ function initTV(){
   const th=getChartTheme();
 
   // ── PRICE CHART ─────────────────────────────────────
-  TV.price=LW.createChart(pEl,{...th,height:260,width:pEl.clientWidth});
+  TV.price=LW.createChart(pEl,{...th,height:360,autoSize:true});
 
   TV.s.candle=TV.price.addCandlestickSeries({
     upColor:'#00cc55',downColor:'#dd2244',
@@ -1055,37 +1074,38 @@ function initTV(){
     priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,
   });
 
-  // ── DIDI INDEX CHART ─────────────────────────────────
-  TV.didi=LW.createChart(dEl,{...th,height:130,width:dEl.clientWidth});
+  // ── DIDI INDEX CHART — Fast/Slow oscillator (apostila Didi) ──
+  // Fast=(MA3/MA8-1)×1000  Slow=(MA20/MA8-1)×1000
+  TV.didi=LW.createChart(dEl,{...th,height:180,autoSize:true});
   TV.s.didiBase=TV.didi.addLineSeries({
-    color:'rgba(60,60,130,.5)',lineWidth:1,
+    color:'rgba(80,80,160,.4)',lineWidth:1,lineStyle:0,
     priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,
   });
   TV.s.slow=TV.didi.addLineSeries({
-    color:'#ff44aa',lineWidth:3,
+    color:'#ff44aa',lineWidth:3,lineStyle:0,
     priceLineVisible:false,lastValueVisible:true,crosshairMarkerVisible:true,crosshairMarkerRadius:4,
   });
   TV.s.fast=TV.didi.addLineSeries({
-    color:'#00eeff',lineWidth:3,
+    color:'#00eeff',lineWidth:3,lineStyle:0,
     priceLineVisible:false,lastValueVisible:true,crosshairMarkerVisible:true,crosshairMarkerRadius:4,
   });
 
-  // ── ADX CHART ────────────────────────────────────────
-  TV.adx=LW.createChart(aEl,{...th,height:130,width:aEl.clientWidth});
+  // ── ADX CHART — all solid lines ──────────────────────
+  TV.adx=LW.createChart(aEl,{...th,height:180,autoSize:true});
   TV.s.adx32=TV.adx.addLineSeries({
-    color:'rgba(255,204,0,.45)',lineWidth:1,lineStyle:1,
+    color:'rgba(255,204,0,.5)',lineWidth:1,lineStyle:0,
     priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false,
   });
   TV.s.diM=TV.adx.addLineSeries({
-    color:'#ff3355',lineWidth:3,lineStyle:2,
+    color:'#ff3355',lineWidth:3,lineStyle:0,
     priceLineVisible:false,lastValueVisible:true,crosshairMarkerVisible:true,crosshairMarkerRadius:4,
   });
   TV.s.diP=TV.adx.addLineSeries({
-    color:'#00bbff',lineWidth:3,
+    color:'#00bbff',lineWidth:3,lineStyle:0,
     priceLineVisible:false,lastValueVisible:true,crosshairMarkerVisible:true,crosshairMarkerRadius:4,
   });
   TV.s.adxL=TV.adx.addLineSeries({
-    color:'#ffcc00',lineWidth:3,lineStyle:3,
+    color:'#ffcc00',lineWidth:3,lineStyle:0,
     priceLineVisible:false,lastValueVisible:true,crosshairMarkerVisible:true,crosshairMarkerRadius:4,
   });
 }
@@ -1110,19 +1130,10 @@ function dCharts(){
   // ── Signal markers ────────────────────────────────────
   const markers=[];
   for(let i=1;i<inds.length;i++){
-    const d=inds[i],prev=inds[i-1];
-    if(!d||!prev||!cs[i])continue;
+    const d=inds[i],p=inds[i-1];if(!d||!p||!cs[i])continue;
     const cur=d.fast!=null&&d.slow!=null?(d.fast>mode.thr&&d.slow<-mode.thr?'BUY':d.fast<-mode.thr&&d.slow>mode.thr?'SELL':null):null;
-    const prv=prev.fast!=null&&prev.slow!=null?(prev.fast>mode.thr&&prev.slow<-mode.thr?'BUY':prev.fast<-mode.thr&&prev.slow>mode.thr?'SELL':null):null;
-    if(cur&&cur!==prv){
-      markers.push({
-        time:cs[i].time,
-        position:cur==='BUY'?'belowBar':'aboveBar',
-        color:cur==='BUY'?'#00ff88':'#ff3355',
-        shape:cur==='BUY'?'arrowUp':'arrowDown',
-        text:cur,size:1,
-      });
-    }
+    const prv=p.fast!=null&&p.slow!=null?(p.fast>mode.thr&&p.slow<-mode.thr?'BUY':p.fast<-mode.thr&&p.slow>mode.thr?'SELL':null):null;
+    if(cur&&cur!==prv)markers.push({time:cs[i].time,position:cur==='BUY'?'belowBar':'aboveBar',color:cur==='BUY'?'#00ff88':'#ff3355',shape:cur==='BUY'?'arrowUp':'arrowDown',text:cur,size:1});
   }
   try{TV.s.candle.setMarkers(markers);}catch(e){}
 
@@ -1164,7 +1175,7 @@ function dCharts(){
     }
   }
 
-  // ── DIDI INDEX ────────────────────────────────────────
+  // ── DIDI INDEX — Fast/Slow oscillator ────────────────
   const fD=[],sD=[],bD=[];
   inds.forEach((d,i)=>{
     if(!cs[i])return;const t=cs[i].time;
@@ -1173,19 +1184,18 @@ function dCharts(){
     bD.push({time:t,value:0});
   });
   try{TV.s.fast.setData(fD);TV.s.slow.setData(sD);TV.s.didiBase.setData(bD);}catch(e){}
-  // Threshold price lines on didi
+  // Threshold price lines
   tvDidiThrLines.forEach(l=>{try{TV.s.didiBase.removePriceLine(l);}catch(e){}});tvDidiThrLines=[];
   try{
-    tvDidiThrLines.push(TV.s.didiBase.createPriceLine({price:mode.thr,color:'rgba(0,255,136,.35)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'+thr'}));
-    tvDidiThrLines.push(TV.s.didiBase.createPriceLine({price:-mode.thr,color:'rgba(255,60,85,.35)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'-thr'}));
+    tvDidiThrLines.push(TV.s.didiBase.createPriceLine({price:mode.thr, color:'rgba(0,255,136,.4)',lineWidth:1,lineStyle:0,axisLabelVisible:false,title:''}));
+    tvDidiThrLines.push(TV.s.didiBase.createPriceLine({price:-mode.thr,color:'rgba(255,60,85,.4)', lineWidth:1,lineStyle:0,axisLabelVisible:false,title:''}));
   }catch(e){}
-  // Color fast line based on signal
   const sig=pd.sig;
   try{TV.s.fast.applyOptions({color:sig==='BUY'?'#00ff88':sig==='SELL'?'#ff3355':'#00eeff'});}catch(e){}
   document.getElementById('dSg').innerHTML=sig?`<b style="color:${sig==='BUY'?'#00ff88':'#ff3355'}">◆ ${sig==='BUY'?'AGULHADA ↑':'AGULHADA ↓'}</b>`:'';
 
   // ── ADX ───────────────────────────────────────────────
-  const adxD=calcADX(cs.slice(-SHOW*2),cfg.adxP);
+  const adxD=calcADX(cs,cfg.adxP);
   const adxFull=adxD;
   const diPd=[],diMd=[],adxLd=[],a32=[];
   adxFull.forEach((d,i)=>{
@@ -1214,10 +1224,15 @@ function dCharts(){
 }
 
 function rsz(){
-  const pEl=document.getElementById('pC'),dEl=document.getElementById('dC'),aEl=document.getElementById('aC');
-  if(TV.price&&pEl)try{TV.price.applyOptions({width:pEl.clientWidth});}catch(e){}
-  if(TV.didi&&dEl) try{TV.didi.applyOptions({width:dEl.clientWidth});}catch(e){}
-  if(TV.adx&&aEl)  try{TV.adx.applyOptions({width:aEl.clientWidth});}catch(e){}
+  // Force LW charts to match container width exactly
+  ['pC','dC','aC'].forEach(id=>{
+    const el=document.getElementById(id);
+    const chart=id==='pC'?TV.price:id==='dC'?TV.didi:TV.adx;
+    if(!el||!chart)return;
+    const w=el.parentElement?el.parentElement.clientWidth-28:el.clientWidth;
+    const h=_chartH[id];
+    try{chart.applyOptions({width:w,height:h});}catch(e){}
+  });
 }
 
 // ════════════════════════════════════════════════════════
@@ -1289,6 +1304,19 @@ function rPb(){document.getElementById('pR').innerHTML=PAIRS.map(p=>`<button cla
 // ════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════
+// ── Expand/collapse chart toggle ─────────────────────
+const _chartH={pC:360,dC:180,aC:180};
+function expandChart(canvasId,wrapperId,normalH,expandedH){
+  const el=document.getElementById(canvasId);
+  const chart=canvasId==='pC'?TV.price:canvasId==='dC'?TV.didi:TV.adx;
+  const isExp=el.dataset.expanded==='1';
+  const newH=isExp?normalH:expandedH;
+  el.style.height=newH+'px';
+  el.dataset.expanded=isExp?'0':'1';
+  _chartH[canvasId]=newH;
+  if(chart)try{chart.applyOptions({height:newH});}catch(e){}
+}
+
 function init(){
   initAll();rMb();rPb();rTfBar();sWs('off');
   startDayBal=bal;
@@ -1296,8 +1324,13 @@ function init(){
     initTV();
     rA();
     sTk();
+    // ResizeObserver fallback for containers that change size without window resize
+    if(window.ResizeObserver){
+      const ro=new ResizeObserver(()=>rsz());
+      ['pW','dW','aW'].forEach(id=>{const el=document.getElementById(id);if(el)ro.observe(el);});
+    }
   },400);
-  window.addEventListener('resize',()=>{rsz();});
+  window.addEventListener('resize',()=>rsz());
 }
 init();
 </script>
